@@ -1,0 +1,16 @@
+{
+  "name": "Telegram Bot Multi-Tool",
+  "short_name": "Telegram Tool",
+  "description": "Download the Telegram Multi-Tool app to manage Telegram bots easily.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}
