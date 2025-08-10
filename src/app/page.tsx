@@ -671,7 +671,7 @@ export default function WebhookTool() {
         </Link>
         <Link
           target="_blank"
-          href="https://github.com/WarFiN123/webhook-multitool"
+          href="https://github.com/WarFiN123/telegram-multitool"
           className={buttonVariants({ variant: "outline", size: "icon" })}
         >
           <Image
