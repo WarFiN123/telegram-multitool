@@ -26,6 +26,7 @@ import {
   Sun,
   CircleStop,
   Play,
+  Trash2,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -63,10 +64,10 @@ interface WebhookEditPayload {
 
 export default function WebhookTool() {
   const [botToken, setBotToken] = useState("");
-  const [savedWebhooks, setSavedWebhooks] = useState<
-    { name: string; url: string }[]
+  const [savedBots, setSavedBots] = useState<
+    { name: string; token: string }[]
   >([]);
-  const [webhookName, setWebhookName] = useState("");
+  const [tokenName, setTokenName] = useState("");
   const [chatID, setChatID] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [content, setContent] = useState("");
@@ -98,10 +99,21 @@ export default function WebhookTool() {
     return regex.test(id);
   };
 
+  const deleteSavedBot = (index: number) => {
+    const newBots = [...savedBots];
+    newBots.splice(index, 1);
+    setSavedBots(newBots);
+    localStorage.setItem("savedBots", JSON.stringify(newBots));
+
+    toast.success("Bot deleted", {
+      description: "The token has been removed from your saved list",
+    });
+  }
+
   useEffect(() => {
-    const saved = localStorage.getItem("savedWebhooks");
+    const saved = localStorage.getItem("savedBots");
     if (saved) {
-      setSavedWebhooks(JSON.parse(saved));
+      setSavedBots(JSON.parse(saved));
     }
 
     const historyData = localStorage.getItem("webhookHistory");
@@ -112,22 +124,22 @@ export default function WebhookTool() {
 
   const { setTheme } = useTheme();
   const saveToken = () => {
-    if (!botToken || !webhookName) {
+    if (!botToken || !tokenName) {
       toast.error("Error", {
         description: "Please provide both a name and URL for the webhook",
       });
       return;
     }
 
-    const newBot = [...savedWebhooks, { name: webhookName, url: botToken }];
-    setSavedWebhooks(newBot);
-    localStorage.setItem("savedWebhooks", JSON.stringify(newBot));
+    const newBot = [...savedBots, { name: tokenName, token: botToken }];
+    setSavedBots(newBot);
+    localStorage.setItem("savedBots", JSON.stringify(newBot));
 
     toast.success("Webhook saved", {
-      description: `Webhook "${webhookName}" has been saved`,
+      description: `Webhook "${tokenName}" has been saved`,
     });
 
-    setWebhookName("");
+    setTokenName("");
   };
 
   const selectWebhook = (url: string) => {
@@ -334,11 +346,10 @@ export default function WebhookTool() {
         onValueChange={setActiveTab}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="message">Message</TabsTrigger>
           <TabsTrigger value="edit">Edit</TabsTrigger>
-          <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+          <TabsTrigger value="tokens">Tokens</TabsTrigger>
         </TabsList>
 
         <TabsContent value="message" className="space-y-4 mt-4">
@@ -360,7 +371,7 @@ export default function WebhookTool() {
                     onChange={(e) => setBotToken(e.target.value)}
                     disabled={isSpamming}
                   />
-                  {savedWebhooks.length > 0 && (
+                  {savedBots.length > 0 && (
                     <div className="relative">
                       <Popover>
                         <PopoverTrigger asChild>
@@ -370,13 +381,13 @@ export default function WebhookTool() {
                         </PopoverTrigger>
                         <PopoverContent className="w-56 p-0">
                           <div className="max-h-[300px] overflow-auto">
-                            {savedWebhooks.map((webhook, index) => (
+                            {savedBots.map((bots, index) => (
                               <div
                                 key={index}
                                 className="flex items-center justify-between p-2 hover:bg-muted cursor-pointer"
-                                onClick={() => selectWebhook(webhook.url)}
+                                onClick={() => selectWebhook(bots.token)}
                               >
-                                <span className="truncate">{webhook.name}</span>
+                                <span className="truncate">{bots.name}</span>
                               </div>
                             ))}
                           </div>
@@ -562,30 +573,30 @@ export default function WebhookTool() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="webhooks" className="space-y-4 mt-4">
+        <TabsContent value="tokens" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Saved Webhooks</CardTitle>
+              <CardTitle>Saved Tokens</CardTitle>
               <CardDescription>
-                Manage your saved Discord webhooks
+                Manage your saved Telegram Tokens
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="webhook-name">Webhook Name</Label>
+                  <Label htmlFor="token-name">Token Name</Label>
                   <Input
-                    id="webhook-name"
-                    placeholder="My Server Webhook"
-                    value={webhookName}
-                    onChange={(e) => setWebhookName(e.target.value)}
+                    id="token-name"
+                    placeholder="My Telegram Bot"
+                    value={tokenName}
+                    onChange={(e) => setTokenName(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="webhook-url-save">Webhook URL</Label>
+                  <Label htmlFor="tokenSave">Bot Token</Label>
                   <Input
-                    id="webhook-url-save"
-                    placeholder="https://discord.com/api/webhooks/..."
+                    id="tokenSave"
+                    placeholder="1234567890:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
                     value={botToken}
                     onChange={(e) => setBotToken(e.target.value)}
                   />
@@ -594,28 +605,28 @@ export default function WebhookTool() {
 
               <Button onClick={saveToken} className="w-full">
                 <Save className="mr-2 size-4" />
-                Save Webhook
+                Save Bot
               </Button>
 
               <Separator />
 
               <div className="space-y-2">
                 <h3 className="text-lg font-medium">Your Saved Webhooks</h3>
-                {savedWebhooks.length === 0 ? (
+                {savedBots.length === 0 ? (
                   <p className="text-muted-foreground">
                     No webhooks saved yet. Add one above.
                   </p>
                 ) : (
-                  <ScrollArea className="h-[300px]">
+                  <ScrollArea className="h-full">
                     <div className="space-y-2">
-                      {savedWebhooks.map((webhook, index) => (
+                      {savedBots.map((bots, index) => (
                         <Card key={index}>
-                          <CardContent className="p-4">
+                          <CardContent>
                             <div className="flex items-center justify-between">
                               <div>
-                                <h4 className="font-medium">{webhook.name}</h4>
+                                <h4 className="font-medium">{bots.name}</h4>
                                 <p className="text-sm text-muted-foreground truncate max-w-[300px]">
-                                  {webhook.url}
+                                  {bots.token}
                                 </p>
                               </div>
                               <div className="flex gap-2">
@@ -623,7 +634,7 @@ export default function WebhookTool() {
                                   variant="outline"
                                   size="icon"
                                   onClick={() => {
-                                    navigator.clipboard.writeText(webhook.url);
+                                    navigator.clipboard.writeText(bots.token);
                                     toast.info("Copied", {
                                       description:
                                         "Webhook URL copied to clipboard",
@@ -636,11 +647,18 @@ export default function WebhookTool() {
                                   variant="outline"
                                   size="icon"
                                   onClick={() => {
-                                    setBotToken(webhook.url);
+                                    setBotToken(bots.token);
                                     setActiveTab("message");
                                   }}
                                 >
                                   <Check className="size-4" />
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="icon"
+                                  onClick={() => deleteSavedBot(index)}
+                                >
+                                  <Trash2 />
                                 </Button>
                               </div>
                             </div>
