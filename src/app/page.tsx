@@ -51,19 +51,18 @@ interface messagePayload {
   tts?: boolean;
 }
 
-interface WebhookEditPayload {
+interface BotEditPayload {
   name?: string;
-  avatar?: string;
+  description?: string;
 }
 
 export default function WebhookTool() {
   const [botToken, setBotToken] = useState("");
-  const [savedBots, setSavedBots] = useState<
-    { name: string; token: string }[]
-  >([]);
+  const [savedBots, setSavedBots] = useState<{ name: string; token: string }[]>(
+    []
+  );
   const [tokenName, setTokenName] = useState("");
   const [chatID, setChatID] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("message");
@@ -71,6 +70,8 @@ export default function WebhookTool() {
   const [useSpam, setUseSpam] = useState(false);
   const spamRef = useRef<{ stop: boolean }>({ stop: false });
   const [displayName, setDisplayName] = useState("");
+  const [botName, setBotName] = useState("");
+  const [description, setDescription] = useState("");
 
   const formatContent = (text: string) => {
     if (!text) return null;
@@ -101,7 +102,7 @@ export default function WebhookTool() {
     toast.success("Bot deleted", {
       description: "The token has been removed from your saved list",
     });
-  }
+  };
 
   const { setTheme } = useTheme();
   const saveToken = () => {
@@ -138,38 +139,47 @@ export default function WebhookTool() {
     setLoading(true);
 
     try {
-      const payload: WebhookEditPayload = {};
-      if (chatID) payload.name = chatID;
-      if (avatarUrl) {
-        const res = await fetch(avatarUrl);
-        const blob = await res.blob();
-        const reader = new FileReader();
-        const base64 = await new Promise<string>((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
+      const payload: BotEditPayload = {};
+
+      if (botName) {
+        payload.name = botName;
+        const response = await fetch(
+          `https://api.telegram.org/bot${botToken}/setMyName?name=${botName}`,
+          {
+            method: "POST",
+          }
+        );
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message);
+        }
+
+        toast.success("Name edited", {
+          description: "The name has been updated successfully",
         });
-        payload.avatar = base64;
       }
 
-      const response = await fetch(botToken, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      if (description) {
+        payload.description = description;
+        const response = await fetch(
+          `https://api.telegram.org/bot${botToken}/setMyShortDescription?short_description=${description}`,
+          {
+            method: "POST",
+          }
+        );
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message);
+        }
+
+        toast.success("Description edited", {
+          description: "The description has been updated successfully",
+        });
       }
-
-      toast.success("Webhook edited", {
-        description: "The webhook has been updated successfully",
-      });
     } catch (error) {
-      toast.error("Error editing webhook", {
+      toast.error("Error editing bot", {
         description: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -332,44 +342,44 @@ export default function WebhookTool() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="bot-token">Bot Token</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="bot-token"
-                    placeholder="1234567890:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
-                    value={botToken}
-                    onChange={(e) => setBotToken(e.target.value)}
-                    disabled={isSpamming}
-                  />
-                  {savedBots.length > 0 && (
-                    <div className="relative">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full">
-                            Saved
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-56 p-0">
-                          <div className="max-h-[300px] overflow-auto">
-                            {savedBots.map((bots, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between p-2 hover:bg-muted cursor-pointer"
-                                onClick={() => selectWebhook(bots.token)}
-                              >
-                                <span className="truncate">{bots.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  )}
-                </div>
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="bot-token">Bot Token</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="bot-token"
+                      placeholder="1234567890:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+                      value={botToken}
+                      onChange={(e) => setBotToken(e.target.value)}
+                      disabled={isSpamming}
+                    />
+                    {savedBots.length > 0 && (
+                      <div className="relative">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-full">
+                              Saved
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-56 p-0">
+                            <div className="max-h-[300px] overflow-auto">
+                              {savedBots.map((bots, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between p-2 hover:bg-muted cursor-pointer"
+                                  onClick={() => selectWebhook(bots.token)}
+                                >
+                                  <span className="truncate">{bots.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="chatID">Chat ID</Label>
                   <Input
@@ -389,9 +399,7 @@ export default function WebhookTool() {
               <Card>
                 <CardHeader>
                   <CardTitle>Message Content</CardTitle>
-                  <CardDescription>
-                    Compose your webhook message
-                  </CardDescription>
+                  <CardDescription>Compose your message</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
@@ -457,11 +465,11 @@ export default function WebhookTool() {
                 <CardHeader>
                   <CardTitle>Preview</CardTitle>
                   <CardDescription>
-                    How your message will appear in Discord
+                    How your message will appear in Telegram
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-[#36393f] text-white rounded-md p-4 min-h-[300px]">
+                  <div className="bg-[#182533] text-white rounded-md p-4 min-h-[300px]">
                     {chatID && (
                       <div className="flex items-center gap-2 mb-2">
                         <span className="font-semibold">
@@ -481,18 +489,16 @@ export default function WebhookTool() {
         <TabsContent value="edit" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Edit Webhook</CardTitle>
-              <CardDescription>
-                Modify the webhook&apos;s settings
-              </CardDescription>
+              <CardTitle>Edit Bot</CardTitle>
+              <CardDescription>Modify the bot&apos;s settings</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="bot-token">Webhook URL</Label>
+                <Label htmlFor="bot-token">Bot Token</Label>
                 <div className="flex gap-2">
                   <Input
                     id="bot-token"
-                    placeholder="https://discord.com/api/webhooks/..."
+                    placeholder="1234567890:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
                     value={botToken}
                     onChange={(e) => setBotToken(e.target.value)}
                     disabled={isSpamming}
@@ -502,31 +508,25 @@ export default function WebhookTool() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="chatID">Edit ChatID</Label>
+                  <Label htmlFor="name">Edit Name</Label>
                   <Input
-                    id="chatID"
+                    id="name"
                     placeholder="Custom Bot Name"
-                    value={chatID}
-                    onChange={(e) => setChatID(e.target.value)}
+                    value={botName}
+                    onChange={(e) => setBotName(e.target.value)}
                     disabled={isSpamming}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="avatar-url">Avatar URL</Label>
+                  <Label htmlFor="description">Description</Label>
                   <div className="flex gap-2">
                     <Input
-                      id="avatar-url"
-                      placeholder="https://example.com/avatar.png"
-                      value={avatarUrl}
-                      onChange={(e) => setAvatarUrl(e.target.value)}
+                      id="description"
+                      placeholder="some cool description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
                       disabled={isSpamming}
                     />
-                    <Avatar>
-                      <AvatarImage src={avatarUrl} alt="Avatar" />
-                      <AvatarFallback>
-                        {chatID ? chatID.charAt(0).toUpperCase() : "D"}
-                      </AvatarFallback>
-                    </Avatar>
                   </div>
                 </div>
               </div>
@@ -534,10 +534,10 @@ export default function WebhookTool() {
             <CardFooter className="flex justify-end">
               <Button
                 onClick={editWebhook}
-                disabled={loading || !botToken || (!chatID && !avatarUrl)}
+                disabled={loading || !botToken || (!botName && !description)}
                 className="md:w-min w-full"
               >
-                <Save className="mr-2 size-4" />
+                <Save className="size-4" />
                 {loading ? "Saving..." : "Save Changes"}
               </Button>
             </CardFooter>
@@ -607,8 +607,7 @@ export default function WebhookTool() {
                                   onClick={() => {
                                     navigator.clipboard.writeText(bots.token);
                                     toast.info("Copied", {
-                                      description:
-                                        "Token copied to clipboard",
+                                      description: "Token copied to clipboard",
                                     });
                                   }}
                                 >
