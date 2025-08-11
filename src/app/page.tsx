@@ -574,7 +574,7 @@ export default function TelegramTool() {
               </div>
 
               <Button onClick={saveToken} className="w-full">
-                <Save className="mr-2 size-4" />
+                <Save className="size-4" />
                 Save Bot
               </Button>
 
