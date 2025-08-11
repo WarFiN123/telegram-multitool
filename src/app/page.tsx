@@ -51,12 +51,6 @@ interface messagePayload {
   tts?: boolean;
 }
 
-interface WebhookHistoryItem {
-  timestamp: string;
-  payload: messagePayload;
-  botToken: string;
-}
-
 interface WebhookEditPayload {
   name?: string;
   avatar?: string;
@@ -72,7 +66,6 @@ export default function WebhookTool() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState<WebhookHistoryItem[]>([]);
   const [activeTab, setActiveTab] = useState("message");
   const [isSpamming, setIsSpamming] = useState(false);
   const [useSpam, setUseSpam] = useState(false);
@@ -110,18 +103,6 @@ export default function WebhookTool() {
     });
   }
 
-  useEffect(() => {
-    const saved = localStorage.getItem("savedBots");
-    if (saved) {
-      setSavedBots(JSON.parse(saved));
-    }
-
-    const historyData = localStorage.getItem("webhookHistory");
-    if (historyData) {
-      setHistory(JSON.parse(historyData));
-    }
-  }, []);
-
   const { setTheme } = useTheme();
   const saveToken = () => {
     if (!botToken || !tokenName) {
@@ -135,8 +116,8 @@ export default function WebhookTool() {
     setSavedBots(newBot);
     localStorage.setItem("savedBots", JSON.stringify(newBot));
 
-    toast.success("Webhook saved", {
-      description: `Webhook "${tokenName}" has been saved`,
+    toast.success("Token saved", {
+      description: `Bot "${tokenName}" has been saved`,
     });
 
     setTokenName("");
@@ -236,20 +217,10 @@ export default function WebhookTool() {
         const error = await response.json();
         throw new Error(error.message);
       }
-
-      const historyItem: WebhookHistoryItem = {
-        timestamp: new Date().toISOString(),
-        payload,
-        botToken,
-      };
-
-      const newHistory = [historyItem, ...history].slice(0, 50);
-      setHistory(newHistory);
-      localStorage.setItem("webhookHistory", JSON.stringify(newHistory));
       const data = await response.json();
       setDisplayName(data.result.chat.first_name);
 
-      toast.success("Webhook sent", {
+      toast.success("Message sent", {
         description: "Your message has been sent successfully",
       });
     } catch (error) {
@@ -283,7 +254,7 @@ export default function WebhookTool() {
     if (content) payload.content = content;
     const spam = async () => {
       toast.info("Spamming started", {
-        description: "Spamming the webhook.",
+        description: "Spamming the target.",
       });
       while (!spamRef.current.stop) {
         let response: Response | undefined;
@@ -326,7 +297,7 @@ export default function WebhookTool() {
     spamRef.current.stop = true;
     setIsSpamming(false);
     toast.info("Spam stopped", {
-      description: "Stopped spamming the webhook.",
+      description: "Stopped spamming the target.",
     });
   };
 
@@ -637,7 +608,7 @@ export default function WebhookTool() {
                                     navigator.clipboard.writeText(bots.token);
                                     toast.info("Copied", {
                                       description:
-                                        "Webhook URL copied to clipboard",
+                                        "Token copied to clipboard",
                                     });
                                   }}
                                 >
