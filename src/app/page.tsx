@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -43,7 +43,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface messagePayload {
   chatID?: string;
@@ -56,7 +55,7 @@ interface BotEditPayload {
   description?: string;
 }
 
-export default function WebhookTool() {
+export default function TelegramTool() {
   const [botToken, setBotToken] = useState("");
   const [savedBots, setSavedBots] = useState<{ name: string; token: string }[]>(
     []
@@ -108,7 +107,7 @@ export default function WebhookTool() {
   const saveToken = () => {
     if (!botToken || !tokenName) {
       toast.error("Error", {
-        description: "Please provide both a name and URL for the webhook",
+        description: "Please provide both a name and token for the bot",
       });
       return;
     }
@@ -124,14 +123,14 @@ export default function WebhookTool() {
     setTokenName("");
   };
 
-  const selectWebhook = (url: string) => {
+  const selectBot = (url: string) => {
     setBotToken(url);
   };
 
-  const editWebhook = async () => {
+  const editBot = async () => {
     if (!isValidToken(botToken)) {
       toast.error("Error", {
-        description: "Please enter a valid Discord webhook URL",
+        description: "Please enter a valid Telegram Bot Token",
       });
       return;
     }
@@ -234,7 +233,7 @@ export default function WebhookTool() {
         description: "Your message has been sent successfully",
       });
     } catch (error) {
-      toast.error("Error sending webhook", {
+      toast.error("Error sending message", {
         description: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -290,7 +289,7 @@ export default function WebhookTool() {
           setDisplayName(data.result.chat.first_name);
         } catch (error) {
           if (!response || response.status !== 429) {
-            toast.error("Error sending webhook", {
+            toast.error("Error sending message", {
               description:
                 error instanceof Error ? error.message : String(error),
             });
@@ -367,7 +366,7 @@ export default function WebhookTool() {
                                 <div
                                   key={index}
                                   className="flex items-center justify-between p-2 hover:bg-muted cursor-pointer"
-                                  onClick={() => selectWebhook(bots.token)}
+                                  onClick={() => selectBot(bots.token)}
                                 >
                                   <span className="truncate">{bots.name}</span>
                                 </div>
@@ -533,7 +532,7 @@ export default function WebhookTool() {
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button
-                onClick={editWebhook}
+                onClick={editBot}
                 disabled={loading || !botToken || (!botName && !description)}
                 className="md:w-min w-full"
               >
@@ -582,10 +581,10 @@ export default function WebhookTool() {
               <Separator />
 
               <div className="space-y-2">
-                <h3 className="text-lg font-medium">Your Saved Webhooks</h3>
+                <h3 className="text-lg font-medium">Your Saved Bots</h3>
                 {savedBots.length === 0 ? (
                   <p className="text-muted-foreground">
-                    No webhooks saved yet. Add one above.
+                    No tokens saved yet. Add one above.
                   </p>
                 ) : (
                   <ScrollArea className="h-full">
