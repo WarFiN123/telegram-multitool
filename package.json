@@ -30,7 +30,7 @@
     "@types/react-dom": "^19.1.7",
     "eslint": "^9.31.0",
     "eslint-config-next": "^15.4.6",
-    "knip": "^5.61.3",
+    "knip": "^5.62.0",
     "tailwindcss": "^4.1.11",
     "tw-animate-css": "^1.3.6",
     "typescript": "^5.8.3"
