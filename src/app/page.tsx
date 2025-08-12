@@ -468,7 +468,7 @@ export default function TelegramTool() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-[#182533] text-white rounded-md p-4 min-h-[300px]">
+                  <div className="bg-[#36393f] text-white rounded-md p-4 min-h-[300px]">
                     {chatID && (
                       <div className="flex items-center gap-2 mb-2">
                         <span className="font-semibold">
