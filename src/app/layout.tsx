@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { Grid } from "@/components/ui/grid";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   alternates: { canonical: "https://telegram.uncoverit.org" },
@@ -88,6 +89,7 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
       <GoogleAnalytics gaId="G-MDFG4Q12JK" />
+      <Script src="https://api.instatus.com/widget?host=status.uncoverit.org&code=4f0eef87&locale=en" />
     </html>
   );
 }
